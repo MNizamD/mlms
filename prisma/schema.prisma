@@ -1,0 +1,454 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../prisma/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_map_class_assessment {
+  id                  BigInt              @id @default(autoincrement())
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  deleted_at          DateTime?           @db.Timestamptz(6)
+  class_id            BigInt
+  assessment_id       BigInt
+  a_trans_assessments a_trans_assessments @relation(fields: [assessment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_classes     a_trans_classes     @relation(fields: [class_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_map_class_members {
+  id               BigInt           @id(map: "a_trans_course_section_instructor_pkey") @default(autoincrement())
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
+  class_id         BigInt
+  profile_id       String           @db.Uuid
+  dropped_at       DateTime?        @db.Timestamptz(6)
+  is_instructor    Boolean          @default(false)
+  a_trans_classes  a_trans_classes  @relation(fields: [class_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_trans_class_members_class_id_fkey")
+  a_trans_profiles a_trans_profiles @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_trans_course_section_instructor_profile_id_fkey")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_map_enrollment_course {
+  id                  BigInt              @id(map: "a_map_enrollment_courses_pkey") @default(autoincrement())
+  enrollment_id       BigInt
+  course_id           BigInt
+  dropped_at          DateTime?           @db.Timestamptz(6)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  a_ref_courses       a_ref_courses       @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_map_enrollment_courses_course_id_fkey")
+  a_trans_enrollments a_trans_enrollments @relation(fields: [enrollment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_map_enrollment_courses_enrollment_id_fkey")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_map_profile_college {
+  id                      BigInt            @id @default(autoincrement())
+  created_at              DateTime          @default(now()) @db.Timestamptz(6)
+  profile_id              String            @db.Uuid
+  college_id              BigInt
+  joined_academic_year_id BigInt?
+  joined_semester_id      Int?              @db.SmallInt
+  a_ref_colleges          a_ref_colleges    @relation(fields: [college_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_semester        a_trans_semester? @relation(fields: [joined_academic_year_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_map_profile_college_joined_academic_year_semester_id_fkey")
+  a_ref_semesters         a_ref_semesters?  @relation(fields: [joined_semester_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_profiles        a_trans_profiles  @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_map_profile_organization {
+  id                      BigInt                 @id @default(autoincrement())
+  created_at              DateTime               @default(now()) @db.Timestamptz(6)
+  profile_id              String                 @db.Uuid
+  organization_id         BigInt
+  joined_academic_year_id BigInt?
+  joined_semester_id      Int?                   @db.SmallInt
+  a_trans_academic_year   a_trans_academic_year? @relation(fields: [joined_academic_year_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_ref_semesters         a_ref_semesters?       @relation(fields: [joined_semester_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_ref_organizations     a_ref_organizations    @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_profiles        a_trans_profiles       @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_map_profile_pictures {
+  id               BigInt           @id @default(autoincrement())
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
+  profile_id       String           @db.Uuid
+  file_id          BigInt
+  a_trans_files    a_trans_files    @relation(fields: [file_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_profiles a_trans_profiles @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_map_profile_program {
+  id                      BigInt                 @id(map: "a_map_profile_department_pkey") @default(autoincrement())
+  created_at              DateTime               @default(now()) @db.Timestamptz(6)
+  profile_id              String                 @db.Uuid
+  program_id              BigInt
+  major_id                BigInt?
+  joined_academic_year_id BigInt?
+  joined_semester_id      Int?                   @db.SmallInt
+  a_trans_profiles        a_trans_profiles       @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_map_profile_department_profile_id_fkey")
+  a_trans_academic_year   a_trans_academic_year? @relation(fields: [joined_academic_year_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_ref_semesters         a_ref_semesters?       @relation(fields: [joined_semester_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_ref_program_majors    a_ref_program_majors?  @relation(fields: [major_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_ref_programs          a_ref_programs         @relation(fields: [program_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_ref_colleges {
+  id                    BigInt                  @id @default(autoincrement())
+  name                  String?
+  location              String?
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @db.Timestamptz(6)
+  deleted_at            DateTime?               @db.Timestamptz(6)
+  is_active             Boolean                 @default(true)
+  logo                  String?
+  organization_id       BigInt
+  a_map_profile_college a_map_profile_college[]
+  a_ref_organizations   a_ref_organizations     @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_ref_college_organization_id_fkey")
+  a_ref_programs        a_ref_programs[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_ref_courses {
+  id                      BigInt                    @id(map: "a_ref_course_pkey") @default(autoincrement())
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                  @db.Timestamptz(6)
+  deleted_at              DateTime?                 @db.Timestamptz(6)
+  is_active               Boolean                   @default(true)
+  code                    String
+  title                   String
+  program_id              BigInt
+  a_map_enrollment_course a_map_enrollment_course[]
+  a_ref_programs          a_ref_programs            @relation(fields: [program_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_trans_course_program_id_fkey")
+  a_trans_assessments     a_trans_assessments[]
+  a_trans_classes         a_trans_classes[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_ref_levels {
+  year       Int      @id(map: "a_ref_year_level_pkey") @default(autoincrement()) @db.SmallInt
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  is_active  Boolean  @default(true)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_ref_organizations {
+  id                         BigInt                       @id(map: "a_ref_organization_pkey") @default(autoincrement())
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  deleted_at                 DateTime?                    @db.Timestamptz(6)
+  name                       String
+  logo                       String?
+  location                   String?
+  is_active                  Boolean                      @default(true)
+  a_map_profile_organization a_map_profile_organization[]
+  a_ref_colleges             a_ref_colleges[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_ref_program_majors {
+  id                    BigInt                  @id(map: "a_ref_majors_pkey") @default(autoincrement())
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @db.Timestamptz(6)
+  deleted_at            DateTime?               @db.Timestamptz(6)
+  program_id            BigInt
+  major_name            String
+  a_map_profile_program a_map_profile_program[]
+  a_ref_programs        a_ref_programs          @relation(fields: [program_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_ref_majors_program_id_fkey")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_ref_programs {
+  id                    BigInt                  @id(map: "a_ref_department_pkey") @default(autoincrement())
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @db.Timestamptz(6)
+  deleted_at            DateTime?               @db.Timestamptz(6)
+  name                  String
+  logo                  String?
+  college_id            BigInt?
+  a_map_profile_program a_map_profile_program[]
+  a_ref_courses         a_ref_courses[]
+  a_ref_program_majors  a_ref_program_majors[]
+  a_ref_colleges        a_ref_colleges?         @relation(fields: [college_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_ref_department_college_id_fkey")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_ref_semesters {
+  id                         Int                          @id(map: "a_ref_semester_pkey1") @default(autoincrement()) @db.SmallInt
+  alias                      String
+  is_active                  Boolean                      @default(true)
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  a_map_profile_college      a_map_profile_college[]
+  a_map_profile_organization a_map_profile_organization[]
+  a_map_profile_program      a_map_profile_program[]
+  a_trans_classes            a_trans_classes[]
+  a_trans_enrollments        a_trans_enrollments[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_trans_academic_year {
+  id                         BigInt                       @id(map: "a_ref_academic_year_pkey") @default(autoincrement())
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                     @db.Timestamptz(6)
+  deleted_at                 DateTime?                    @db.Timestamptz(6)
+  started_at                 DateTime                     @db.Timestamptz(6)
+  ended_at                   DateTime                     @db.Timestamptz(6)
+  a_map_profile_organization a_map_profile_organization[]
+  a_map_profile_program      a_map_profile_program[]
+  a_trans_classes            a_trans_classes[]
+  a_trans_enrollments        a_trans_enrollments[]
+  a_trans_semester           a_trans_semester[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_trans_assessments {
+  id                     BigInt                   @id(map: "a_trans_assessment_pkey") @default(autoincrement())
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  deleted_at             DateTime?                @db.Timestamptz(6)
+  title                  String
+  description            String?
+  course_id              BigInt
+  a_map_class_assessment a_map_class_assessment[]
+  a_ref_courses          a_ref_courses            @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_item_banks     a_trans_item_banks[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_trans_classes {
+  id                     BigInt                   @id(map: "a_trans_course_sections_pkey") @default(autoincrement())
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  deleted_at             DateTime?                @db.Timestamptz(6)
+  course_id              BigInt
+  section                String
+  start_time             String                   @default("13:00")
+  end_time               String                   @default("15:00")
+  room                   String?
+  academic_year_id       BigInt
+  semester_year_id       Int                      @db.SmallInt
+  instructor_id          String                   @db.Uuid
+  a_map_class_assessment a_map_class_assessment[]
+  a_map_class_members    a_map_class_members[]
+  a_trans_academic_year  a_trans_academic_year    @relation(fields: [academic_year_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_trans_course_sections_academic_year_id_fkey")
+  a_ref_courses          a_ref_courses            @relation(fields: [course_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_trans_course_sections_course_id_fkey")
+  a_trans_profiles       a_trans_profiles         @relation(fields: [instructor_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_trans_course_sections_instructor_id_fkey")
+  a_ref_semesters        a_ref_semesters          @relation(fields: [semester_year_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_trans_course_sections_semester_year_id_fkey")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_trans_enrollments {
+  id                      BigInt                    @id @default(autoincrement())
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  profile_id              String                    @db.Uuid
+  academic_year_id        BigInt
+  semester_id             Int                       @db.SmallInt
+  dropped_at              DateTime?                 @db.Timestamptz(6)
+  a_map_enrollment_course a_map_enrollment_course[]
+  a_trans_academic_year   a_trans_academic_year     @relation(fields: [academic_year_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_profiles        a_trans_profiles          @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_ref_semesters         a_ref_semesters           @relation(fields: [semester_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_trans_files {
+  id                     BigInt                   @id @default(autoincrement())
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  deleted_at             DateTime?                @db.Timestamptz(6)
+  url                    String
+  created_by             String                   @db.Uuid
+  type                   String                   @default("jpg")
+  a_map_profile_pictures a_map_profile_pictures[]
+  a_trans_profiles       a_trans_profiles         @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_trans_item_banks {
+  id                  BigInt              @id @default(autoincrement())
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  deleted_at          DateTime?           @db.Timestamptz(6)
+  type                String?             @default("MCQ")
+  question            String
+  choices             Json?               @default("[]") @db.Json
+  attachment          String?
+  assessment_id       BigInt
+  created_by          String              @db.Uuid
+  points              Int                 @default(1) @db.SmallInt
+  a_trans_assessments a_trans_assessments @relation(fields: [assessment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_profiles    a_trans_profiles    @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_trans_profiles {
+  id                         String                       @id(map: "trans_profile_new_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name                 String
+  middle_name                String?
+  last_name                  String
+  extension                  String?
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  deleted_at                 DateTime?                    @db.Timestamptz(6)
+  prefix                     String?
+  user_id                    String                       @unique
+  a_map_class_members        a_map_class_members[]
+  a_map_profile_college      a_map_profile_college[]
+  a_map_profile_organization a_map_profile_organization[]
+  a_map_profile_pictures     a_map_profile_pictures[]
+  a_map_profile_program      a_map_profile_program[]
+  a_trans_classes            a_trans_classes[]
+  a_trans_enrollments        a_trans_enrollments[]
+  a_trans_files              a_trans_files[]
+  a_trans_item_banks         a_trans_item_banks[]
+  trans_class                trans_class[]
+  trans_enrollment           trans_enrollment[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model a_trans_semester {
+  id                    BigInt                  @id(map: "a_ref_semester_pkey") @default(autoincrement())
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  academic_year_id      BigInt
+  semester              Int                     @default(0) @db.SmallInt
+  a_map_profile_college a_map_profile_college[]
+  a_trans_academic_year a_trans_academic_year   @relation(fields: [academic_year_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "a_ref_semester_academic_year_id_fkey")
+}
+
+model account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(6)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(6)
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime  @db.Timestamptz(6)
+  user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+}
+
+model invitation {
+  id             String       @id
+  organizationId String
+  email          String
+  role           String?
+  status         String
+  expiresAt      DateTime     @db.Timestamptz(6)
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
+  inviterId      String
+  user           user         @relation(fields: [inviterId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  organization   organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([email])
+  @@index([organizationId])
+}
+
+model member {
+  id             String       @id
+  organizationId String
+  userId         String
+  role           String
+  createdAt      DateTime     @db.Timestamptz(6)
+  organization   organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user           user         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model organization {
+  id         String       @id
+  name       String
+  slug       String       @unique
+  logo       String?
+  createdAt  DateTime     @db.Timestamptz(6)
+  metadata   String?
+  invitation invitation[]
+  member     member[]
+}
+
+model session {
+  id                   String   @id
+  expiresAt            DateTime @db.Timestamptz(6)
+  token                String   @unique
+  createdAt            DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime @db.Timestamptz(6)
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  impersonatedBy       String?
+  activeOrganizationId String?
+  user                 user     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+}
+
+model trans_class {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  teacher_id       String?            @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String             @unique
+  image            String?
+  description      String?
+  color_code       String?
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  deleted_at       DateTime?          @db.Timestamptz(6)
+  a_trans_profiles a_trans_profiles?  @relation(fields: [teacher_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  trans_enrollment trans_enrollment[]
+}
+
+model trans_enrollment {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student_id       String           @db.Uuid
+  class_id         String           @db.Uuid
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?        @default(now()) @db.Timestamptz(6)
+  deleted_at       DateTime?        @db.Timestamptz(6)
+  trans_class      trans_class      @relation(fields: [class_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  a_trans_profiles a_trans_profiles @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model user {
+  id              String       @id
+  name            String
+  email           String       @unique
+  emailVerified   Boolean
+  image           String?
+  createdAt       DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime     @default(now()) @db.Timestamptz(6)
+  role            String?
+  banned          Boolean?
+  banReason       String?
+  banExpires      DateTime?    @db.Timestamptz(6)
+  username        String?      @unique
+  displayUsername String?
+  agreed_to_terms Boolean?     @default(false)
+  agree_at        DateTime?    @db.Timestamptz(6)
+  account         account[]
+  invitation      invitation[]
+  member          member[]
+  session         session[]
+}
+
+model verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([identifier])
+}
