@@ -12,6 +12,7 @@ export async function HomePage() {
                 <p className="text-muted wrap-break-word text-sm">
                     Learn, connect, and manage everything you need in one simple place.
                 </p>
+                {/* {JSON.stringify(clerkAuth)} */}
                 {!clerkAuth.userId ? (
                     <>
                         <AuthButton type="signIn" />

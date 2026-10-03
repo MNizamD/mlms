@@ -12,7 +12,7 @@ import {
   Mail,
 } from 'lucide-react';
 
-const navItems = [
+export const teacherNavItems = [
   { href: '/teacher/home', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/teacher/classes', label: 'Classes', icon: Users },
   { href: '/teacher/attendance', label: 'Attendance', icon: ClipboardList },
@@ -25,5 +25,5 @@ const navItems = [
 ];
 
 export default function TeacherLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell navItems={navItems}>{children}</AppShell>;
+  return <AppShell navItems={teacherNavItems}>{children}</AppShell>;
 }

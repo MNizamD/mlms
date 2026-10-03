@@ -23,7 +23,7 @@ const config: runtime.GetPrismaClientConfig = {
       "value": "prisma-client"
     },
     "output": {
-      "value": "C:\\Users\\Marohom\\Desktop\\React Projects\\mllms\\prisma\\generated\\prisma",
+      "value": "C:\\Users\\Marohom\\Desktop\\React Projects\\malearn\\prisma\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -37,7 +37,7 @@ const config: runtime.GetPrismaClientConfig = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Marohom\\Desktop\\React Projects\\mllms\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\Marohom\\Desktop\\React Projects\\malearn\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativePath": "../..",
@@ -47,7 +47,7 @@ const config: runtime.GetPrismaClientConfig = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
+  "postinstall": true,
   "inlineDatasources": {
     "db": {
       "url": {

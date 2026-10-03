@@ -1,18 +1,20 @@
 import prisma from "@/prisma/prisma";
 import { userProfileSchema } from "@/types/UserProfile";
 import { omit } from "@/util/objectFiltering";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { auth, clerkClient as cc } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 export async function POST(request: Request) {
     try {
-        const { userId } = await auth.protect();
-        const body = await request.json();
+        const [{ userId }, body, clerkClient] = await Promise.all([
+            auth.protect(), //
+            request.json(),
+            cc(),
+        ]);
 
         // Throws ZodError if the body is invalid
         const data = userProfileSchema.parse(body);
-        console.log(data);
 
         await prisma.$transaction(async (tx) => {
             await Promise.all([
@@ -21,36 +23,32 @@ export async function POST(request: Request) {
                         user_id: userId,
                         a_map_profile_organization: {
                             createMany: {
-                                data: [
-                                    {
-                                        organization_id: data.organization_id,
-                                    },
-                                ],
+                                data: data.organization_ids.map((orgID) => ({
+                                    organization_id: orgID,
+                                })),
+                                skipDuplicates: true,
                             },
                         },
                         a_map_profile_college: {
                             createMany: {
-                                data: [
-                                    {
-                                        college_id: data.college_id,
-                                    },
-                                ],
-                                skipDuplicates: true,
-                            },
-                        },a_map_profile_program: {
-                            createMany: {
-                                data: [
-                                    {
-                                        program_id: data.program_id,
-                                    },
-                                ],
+                                data: data.college_ids.map((collegeID) => ({
+                                    college_id: collegeID,
+                                })),
                                 skipDuplicates: true,
                             },
                         },
-                        ...omit(data, ["organization_id", "college_id", "program_id", "roles"]),
+                        a_map_profile_program: {
+                            createMany: {
+                                data: data.program_ids.map((programID) => ({
+                                    program_id: programID,
+                                })),
+                                skipDuplicates: true,
+                            },
+                        },
+                        ...omit(data, ["organization_ids", "college_ids", "program_ids", "roles"]),
                     },
                 }),
-                (await clerkClient()).users.updateUserMetadata(userId, {
+                clerkClient.users.updateUserMetadata(userId, {
                     publicMetadata: {
                         roles: [data.roles],
                     },

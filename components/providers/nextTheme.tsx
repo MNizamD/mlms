@@ -4,7 +4,7 @@ import * as React from "react";
 
 export function HerouiProvider({ children }: { children: React.ReactNode }) {
     return (
-        <NextThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+        <NextThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
         </NextThemeProvider>
     );
